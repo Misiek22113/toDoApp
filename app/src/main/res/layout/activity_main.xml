@@ -9,6 +9,23 @@
     android:backgroundTint="@color/jet_grey"
     tools:context=".MainActivity">
 
+    <SearchView
+        android:id="@+id/locationSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="10dp"
+        android:background="@drawable/custom_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:queryHint="wpisz zadanie"
+        android:imeOptions="actionSearch"
+        android:isScrollContainer="false"
+        android:inputType="text"
+        android:iconifiedByDefault="false"
+        app:queryBackground="@android:color/black" />
+
     <include
         layout="@layout/todo_card"
         android:layout_width="409dp"
