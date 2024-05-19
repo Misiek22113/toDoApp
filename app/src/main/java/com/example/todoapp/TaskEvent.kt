@@ -8,7 +8,7 @@ sealed interface TaskEvent {
     data class SetDueTime(val dueTime: Long) : TaskEvent
     data class SetNotifications(val notifications: Boolean) : TaskEvent
     data class SetIsCompleted(val isCompleted: Boolean) : TaskEvent
-    data class SetCategory(val category: String) : TaskEvent
+    data class SetCategory(val category: CategoryType) : TaskEvent
     data class SetAttachments(val attachments: List<String>) : TaskEvent
     object ShowDialog: TaskEvent
     object HideDialog: TaskEvent

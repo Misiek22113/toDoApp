@@ -10,7 +10,7 @@ data class TaskState(
     val isCompleted: Boolean = false,
     val category: String = "",
     val attachments: List<String> = emptyList(),
-    val showDialog: Boolean = false,
+    val isAddingTask: Boolean = false,
     val filter: String = "",
     val isFiltered: CategoryType = CategoryType.NONE,
     val isDoneTaskFiler: Boolean = false
