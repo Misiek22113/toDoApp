@@ -12,6 +12,7 @@ sealed interface TaskEvent {
     data class SetAttachments(val attachments: List<String>) : TaskEvent
     object ShowDialog: TaskEvent
     object HideDialog: TaskEvent
-    data class FilterTasks(val filter: String): TaskEvent
+    data class FilterDoneTasks(val isFiltered: Boolean): TaskEvent
+    data class FilterTasks(val filter: CategoryType): TaskEvent
     data class DeleteTask(val task: Task): TaskEvent
 }
