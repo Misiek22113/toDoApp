@@ -6,4 +6,5 @@
     <string name="task_description_hint">Task description</string>
     <string name="task_due_date_hint">Task due date</string>
     <string name="task_category_hint">Task category</string>
+    <string name="add_new_task">Add new task</string>
 </resources>
