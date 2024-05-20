@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="300dp"
     android:layout_height="wrap_content"
     tools:layout_editor_absoluteX="1dp"
     tools:layout_editor_absoluteY="126dp">
@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:paddingTop="15dp"
             android:text="@string/add_new_task"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textAlignment="center" />
 
         <com.google.android.material.textfield.TextInputLayout

@@ -1,4 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="simple_items" />
+    <string-array name="simple_items">
+        <item>none</item>
+        <item>work</item>
+        <item>school</item>
+        <item>home</item>
+    </string-array>
 </resources>
