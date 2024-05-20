@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.app.Dialog
+import android.util.Log
 import android.widget.Button
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
@@ -65,7 +66,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.onEvent(TaskEvent.SetIsCompleted(false))
                 viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
                 viewModel.onEvent(TaskEvent.SetDueTime(System.currentTimeMillis()))
+                viewModel.onEvent(TaskEvent.SetCategory(CategoryType.NONE))
                 viewModel.onEvent(TaskEvent.AddTask)
+                Log.i("Logcat", "Adding task with title: $title and description: $description")
                 dialog.dismiss()
             }
         }

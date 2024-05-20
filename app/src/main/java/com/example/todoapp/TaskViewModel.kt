@@ -1,5 +1,6 @@
 package com.example.todoapp
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,31 +47,33 @@ class TaskViewModel(
             }
 
             TaskEvent.AddTask -> {
-                val title = state.value.title
-                val description = state.value.description
-                val createTime = state.value.createTime
-                val dueTime = state.value.dueTime
-                val notifications = state.value.notifications
-                val isCompleted = state.value.isCompleted
-                val category = state.value.category
-                val attachments = state.value.attachments
+                val title = _state.value.title
+                val description = _state.value.description
+                val createTime = _state.value.createTime
+                val dueTime = _state.value.dueTime
+                val notifications = _state.value.notifications
+                val isCompleted = _state.value.isCompleted
+                val category = _state.value.category
+                val attachments = _state.value.attachments
 
-                if (title.isBlank() || description.isBlank() ||
-                    createTime == 0L || dueTime == 0L ||
-                    category.isBlank() || attachments.isEmpty()) {
-                    return
-                }
+//                if (title.isBlank() || description.isBlank() ||
+//                    createTime == 0L || dueTime == 0L ||
+//                    category.isBlank()) {
+//                    return
+//                }
 
                 val task = Task(
-                    title = title,
-                    description = description,
-                    createTime = createTime,
-                    dueTime = dueTime,
-                    notifications = notifications,
-                    isCompleted = isCompleted,
-                    category = category,
-                    attachments = attachments
+                    title,
+                    description,
+                    createTime,
+                    dueTime,
+                    notifications,
+                    isCompleted,
+                    category,
+                    attachments
                 )
+
+                Log.i("Logcat", "Adding task: $task")
 
                 viewModelScope.launch {
                     dao.upsertTask(task)
@@ -142,6 +145,7 @@ class TaskViewModel(
                 _state.update {
                     it.copy(title = event.title)
                 }
+                Log.i("Logcat", "Setting title: ${event.title} to ${_state.value.title}")
             }
 
             TaskEvent.ShowDialog -> {
