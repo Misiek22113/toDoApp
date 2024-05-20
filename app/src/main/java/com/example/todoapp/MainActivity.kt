@@ -11,13 +11,19 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.todoapp.databinding.ActivityMainBinding
+import com.example.weather_app.adapter.TaskAdapter
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var adapter: TaskAdapter
 
     private val db by lazy {
         Room.databaseBuilder(
@@ -56,6 +62,18 @@ class MainActivity : AppCompatActivity() {
         val taskTitleText = dialog.findViewById<TextInputLayout>(R.id.taskTitle)
         val taskDescriptionText = dialog.findViewById<TextInputLayout>(R.id.taskDescription)
         val addTaskButton = dialog.findViewById<Button>(R.id.addTask)
+
+        adapter = TaskAdapter(emptyList(), viewModel)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        lifecycleScope.launch {
+            viewModel.state.collect {state ->
+                adapter.updateTasks(state.tasks)
+            }
+        }
 
         addTaskButton.setOnClickListener {
             val title = taskTitleText.editText?.text.toString()

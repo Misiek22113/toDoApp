@@ -29,7 +29,7 @@ class TaskViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
 
-    private val state = combine(
+    val state = combine(
         _state,
         _tasks,
         _filterDoneTask,
@@ -159,6 +159,10 @@ class TaskViewModel(
                     it.copy(isAddingTask = false)
                 }
             }
+
+            TaskEvent.AddTask -> TODO()
+            TaskEvent.HideDialog -> TODO()
+            TaskEvent.ShowDialog -> TODO()
         }
     }
 }

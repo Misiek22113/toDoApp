@@ -13,5 +13,5 @@ data class Task(
     val category: String,
     val attachments: List<String>,
     @PrimaryKey(autoGenerate = true)
-    val id: Int? = 0
+    val id: Int? = null
 )
