@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">ToDoApp</string>
-    <string name="creation_time">16:54</string>
+    <string name="category">HOME</string>
     <string name="task_name">Wyrzuć śmieci</string>
     <string name="task_title_hint">Task title</string>
     <string name="task_description_hint">Task description</string>
