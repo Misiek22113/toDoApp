@@ -7,6 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.app.Dialog
 import android.util.Log
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         ).build()
     }
 
-    private val viewModel by viewModels<TaskViewModel> (
+    private val viewModel by viewModels<TaskViewModel>(
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         val taskTitleText = dialog.findViewById<TextInputLayout>(R.id.taskTitle)
         val taskDescriptionText = dialog.findViewById<TextInputLayout>(R.id.taskDescription)
         val addTaskButton = dialog.findViewById<Button>(R.id.addTask)
+        val category = dialog.findViewById<AutoCompleteTextView>(R.id.menuCategory)
 
         adapter = TaskAdapter(emptyList(), viewModel)
 
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         lifecycleScope.launch {
-            viewModel.state.collect {state ->
+            viewModel.state.collect { state ->
                 adapter.updateTasks(state.tasks)
             }
         }
@@ -94,7 +96,8 @@ class MainActivity : AppCompatActivity() {
 
         materialDatePicker.addOnPositiveButtonClickListener {
             val selectedDate = it
-            val dateString = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
+            val dateString =
+                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
             dateEditText.setText(dateString)
             dueDate = selectedDate
         }
@@ -109,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                 viewModel.onEvent(TaskEvent.SetIsCompleted(false))
                 viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
                 viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
-                viewModel.onEvent(TaskEvent.SetCategory(CategoryType.NONE))
+                viewModel.onEvent(TaskEvent.SetCategory(getCategoryType(category.text.toString())))
                 viewModel.onEvent(TaskEvent.AddTask)
                 Log.i("Logcat", "Adding task with title: $title and description: $description")
                 dialog.dismiss()
@@ -120,5 +123,14 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
 
+    }
+
+    private fun getCategoryType(category: String): CategoryType {
+        return when (category) {
+            "work" -> CategoryType.WORK
+            "school" -> CategoryType.SCHOOL
+            "home" -> CategoryType.HOME
+            else -> CategoryType.NONE
+        }
     }
 }

@@ -56,11 +56,11 @@ class TaskViewModel(
                 val category = _state.value.category
                 val attachments = _state.value.attachments
 
-//                if (title.isBlank() || description.isBlank() ||
-//                    createTime == 0L || dueTime == 0L ||
-//                    category.isBlank()) {
-//                    return
-//                }
+                if (title.isBlank() || description.isBlank() ||
+                    createTime == 0L || dueTime == 0L ||
+                    category.isBlank()) {
+                    return
+                }
 
                 val task = Task(
                     title,
