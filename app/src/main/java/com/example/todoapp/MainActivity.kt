@@ -17,8 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.weather_app.adapter.TaskAdapter
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,15 +80,35 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val datePicker = dialog.findViewById<TextInputLayout>(R.id.dateInputLayout)
+        val dateEditText = dialog.findViewById<TextInputEditText>(R.id.dateEditText)
+        var dueDate: Long = 0
+
+        val builder = MaterialDatePicker.Builder.datePicker()
+        builder.setTitleText("Select date")
+        val materialDatePicker = builder.build()
+
+        datePicker.editText?.setOnClickListener {
+            materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
+        }
+
+        materialDatePicker.addOnPositiveButtonClickListener {
+            val selectedDate = it
+            val dateString = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
+            dateEditText.setText(dateString)
+            dueDate = selectedDate
+        }
+
         addTaskButton.setOnClickListener {
             val title = taskTitleText.editText?.text.toString()
             val description = taskDescriptionText.editText?.text.toString()
-            if (title.isNotBlank() && description.isNotBlank()) {
+
+            if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
                 viewModel.onEvent(TaskEvent.SetTitle(title))
                 viewModel.onEvent(TaskEvent.SetDescription(description))
                 viewModel.onEvent(TaskEvent.SetIsCompleted(false))
                 viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
-                viewModel.onEvent(TaskEvent.SetDueTime(System.currentTimeMillis()))
+                viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
                 viewModel.onEvent(TaskEvent.SetCategory(CategoryType.NONE))
                 viewModel.onEvent(TaskEvent.AddTask)
                 Log.i("Logcat", "Adding task with title: $title and description: $description")
@@ -94,7 +119,6 @@ class MainActivity : AppCompatActivity() {
         binding.fab.setOnClickListener {
             dialog.show()
         }
-
 
     }
 }
