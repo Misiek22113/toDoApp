@@ -9,6 +9,9 @@
     <string name="add_new_task">Add new task</string>
     <string name="add_task">Add Task</string>
     <string name="show_finished">Show finished tasks</string>
-<!--    <string name="">label_2</string>-->
+    <string name="add_task_dialog_title">Add new Task</string>
+    <string name="cancel">cancel</string>
+    <string name="accept">accept</string>
+    <!--    <string name="">label_2</string>-->
 <!--    <string name="label_3">label_3</string>-->
 </resources>

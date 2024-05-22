@@ -1,6 +1,7 @@
 package com.example.todoapp
 
 import BottomSheet
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,7 @@ import androidx.room.Room
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.weather_app.adapter.TaskAdapter
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -50,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
     )
 
+    @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,13 +66,42 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.add_task_dialog)
+        val dialogView = layoutInflater.inflate(R.layout.add_task_dialog, null)
 
-        val taskTitleText = dialog.findViewById<TextInputLayout>(R.id.taskTitle)
-        val taskDescriptionText = dialog.findViewById<TextInputLayout>(R.id.taskDescription)
-        val addTaskButton = dialog.findViewById<Button>(R.id.addTask)
-        val category = dialog.findViewById<AutoCompleteTextView>(R.id.menuCategory)
+        val taskTitleText = dialogView.findViewById<TextInputLayout>(R.id.taskTitle)
+        val taskDescriptionText = dialogView.findViewById<TextInputLayout>(R.id.taskDescription)
+        val category = dialogView.findViewById<AutoCompleteTextView>(R.id.menuCategory)
+        val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
+        val dateEditText = dialogView.findViewById<TextInputEditText>(R.id.dateEditText)
+
+        val builder = MaterialDatePicker.Builder.datePicker()
+        builder.setTitleText("Select date")
+        val materialDatePicker = builder.build()
+
+        datePicker.editText?.setOnClickListener {
+            materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
+        }
+
+        var dueDate: Long = 0
+
+        materialDatePicker.addOnPositiveButtonClickListener {
+            val selectedDate = it
+            val dateString =
+                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
+            dateEditText.setText(dateString)
+            dueDate = selectedDate
+        }
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(resources.getString(R.string.add_task_dialog_title))
+            .setMessage(resources.getString(R.layout.add_task_dialog))
+            .setNeutralButton(resources.getString(R.string.cancel)) { dialog, which ->
+            }
+            .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
+                val title = taskTitleText.editText?.text.toString()
+                val description = taskDescriptionText.editText?.text.toString()
+                addTaskToDatabase(title, description, dueDate, category.text.toString())
+            }.setView(dialogView)
 
         adapter = TaskAdapter(emptyList(), viewModel)
 
@@ -80,43 +112,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.state.collect { state ->
                 adapter.updateTasks(state.tasks)
-            }
-        }
-
-        val datePicker = dialog.findViewById<TextInputLayout>(R.id.dateInputLayout)
-        val dateEditText = dialog.findViewById<TextInputEditText>(R.id.dateEditText)
-        var dueDate: Long = 0
-
-        val builder = MaterialDatePicker.Builder.datePicker()
-        builder.setTitleText("Select date")
-        val materialDatePicker = builder.build()
-
-        datePicker.editText?.setOnClickListener {
-            materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
-        }
-
-        materialDatePicker.addOnPositiveButtonClickListener {
-            val selectedDate = it
-            val dateString =
-                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
-            dateEditText.setText(dateString)
-            dueDate = selectedDate
-        }
-
-        addTaskButton.setOnClickListener {
-            val title = taskTitleText.editText?.text.toString()
-            val description = taskDescriptionText.editText?.text.toString()
-
-            if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
-                viewModel.onEvent(TaskEvent.SetTitle(title))
-                viewModel.onEvent(TaskEvent.SetDescription(description))
-                viewModel.onEvent(TaskEvent.SetIsCompleted(false))
-                viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
-                viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
-                viewModel.onEvent(TaskEvent.SetCategory(getCategoryType(category.text.toString())))
-                viewModel.onEvent(TaskEvent.AddTask)
-                Log.i("Logcat", "Adding task with title: $title and description: $description")
-                dialog.dismiss()
             }
         }
 
@@ -138,6 +133,18 @@ class MainActivity : AppCompatActivity() {
             "school" -> CategoryType.SCHOOL
             "home" -> CategoryType.HOME
             else -> CategoryType.NONE
+        }
+    }
+
+    private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: String) {
+        if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
+            viewModel.onEvent(TaskEvent.SetTitle(title))
+            viewModel.onEvent(TaskEvent.SetDescription(description))
+            viewModel.onEvent(TaskEvent.SetIsCompleted(false))
+            viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
+            viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
+            viewModel.onEvent(TaskEvent.SetCategory(getCategoryType(category)))
+            viewModel.onEvent(TaskEvent.AddTask)
         }
     }
 }

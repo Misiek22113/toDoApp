@@ -13,16 +13,6 @@
         android:orientation="vertical"
         android:paddingHorizontal="15dp">
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="15dp"
-            android:text="@string/add_new_task"
-            android:textAlignment="center"
-            android:textSize="20sp" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/taskTitle"
             android:layout_width="match_parent"
@@ -93,13 +83,6 @@
                 android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/addTask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/add_task" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
