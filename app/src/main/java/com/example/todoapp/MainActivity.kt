@@ -1,5 +1,6 @@
 package com.example.todoapp
 
+import BottomSheet
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -117,6 +118,12 @@ class MainActivity : AppCompatActivity() {
                 Log.i("Logcat", "Adding task with title: $title and description: $description")
                 dialog.dismiss()
             }
+        }
+
+        val bottomSheetDialog = BottomSheet()
+
+        binding.settingsButton.setOnClickListener {
+            bottomSheetDialog.show(supportFragmentManager, "MyBottomSheetDialogFragment")
         }
 
         binding.fab.setOnClickListener {

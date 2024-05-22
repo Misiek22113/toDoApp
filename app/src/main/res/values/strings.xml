@@ -8,4 +8,7 @@
     <string name="task_category_hint">Task category</string>
     <string name="add_new_task">Add new task</string>
     <string name="add_task">Add Task</string>
+    <string name="show_finished">Show finished tasks</string>
+<!--    <string name="">label_2</string>-->
+<!--    <string name="label_3">label_3</string>-->
 </resources>
