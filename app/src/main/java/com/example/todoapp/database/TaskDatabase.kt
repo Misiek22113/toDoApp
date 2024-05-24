@@ -1,9 +1,11 @@
-package com.example.todoapp
+package com.example.todoapp.database
 
-import com.example.todoapp.Converters;
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.todoapp.util.Converters
+import com.example.todoapp.dao.TaskDao
+import com.example.todoapp.model.Task
 
 @Database(
     entities = [Task::class],

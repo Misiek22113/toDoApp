@@ -1,4 +1,7 @@
-package com.example.todoapp
+package com.example.todoapp.view
+
+import com.example.todoapp.model.CategoryType
+import com.example.todoapp.model.Task
 
 data class TaskState(
     val tasks: List<Task> = emptyList(),

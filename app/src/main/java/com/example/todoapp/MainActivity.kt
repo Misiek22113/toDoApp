@@ -1,16 +1,13 @@
 package com.example.todoapp
 
-import BottomSheet
+import com.example.todoapp.view.BottomSheet
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.app.Dialog
-import android.util.Log
 import android.widget.AutoCompleteTextView
-import android.widget.Button
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -18,8 +15,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.example.todoapp.database.TaskDatabase
 import com.example.todoapp.databinding.ActivityMainBinding
-import com.example.weather_app.adapter.TaskAdapter
+import com.example.todoapp.model.CategoryType
+import com.example.todoapp.model.TaskEvent
+import com.example.todoapp.view.TaskViewModel
+import com.example.todoapp.adapter.TaskAdapter
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -66,6 +67,40 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        adapter = TaskAdapter(emptyList(), viewModel)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        lifecycleScope.launch {
+            viewModel.state.collect { state ->
+                adapter.updateTasks(state.tasks)
+            }
+        }
+
+        val bottomSheetDialog = BottomSheet()
+
+        binding.settingsButton.setOnClickListener {
+            bottomSheetDialog.show(supportFragmentManager, "MyBottomSheetDialogFragment")
+        }
+
+        binding.fab.setOnClickListener {
+            showAddTaskDialog()
+        }
+
+    }
+
+    private fun getCategoryType(category: String): CategoryType {
+        return when (category) {
+            "work" -> CategoryType.WORK
+            "school" -> CategoryType.SCHOOL
+            "home" -> CategoryType.HOME
+            else -> CategoryType.NONE
+        }
+    }
+
+    private fun showAddTaskDialog() {
         val dialogView = layoutInflater.inflate(R.layout.add_task_dialog, null)
 
         val taskTitleText = dialogView.findViewById<TextInputLayout>(R.id.taskTitle)
@@ -94,7 +129,6 @@ class MainActivity : AppCompatActivity() {
 
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(resources.getString(R.string.add_task_dialog_title))
-            .setMessage(resources.getString(R.layout.add_task_dialog))
             .setNeutralButton(resources.getString(R.string.cancel)) { dialog, which ->
             }
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
@@ -103,39 +137,8 @@ class MainActivity : AppCompatActivity() {
                 addTaskToDatabase(title, description, dueDate, category.text.toString())
             }.setView(dialogView)
 
-        adapter = TaskAdapter(emptyList(), viewModel)
-
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-
-        lifecycleScope.launch {
-            viewModel.state.collect { state ->
-                adapter.updateTasks(state.tasks)
-            }
-        }
-
-        val bottomSheetDialog = BottomSheet()
-
-        binding.settingsButton.setOnClickListener {
-            bottomSheetDialog.show(supportFragmentManager, "MyBottomSheetDialogFragment")
-        }
-
-        binding.fab.setOnClickListener {
-            dialog.show()
-        }
-
+        dialog.show()
     }
-
-    private fun getCategoryType(category: String): CategoryType {
-        return when (category) {
-            "work" -> CategoryType.WORK
-            "school" -> CategoryType.SCHOOL
-            "home" -> CategoryType.HOME
-            else -> CategoryType.NONE
-        }
-    }
-
     private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: String) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
             viewModel.onEvent(TaskEvent.SetTitle(title))

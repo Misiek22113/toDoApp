@@ -1,4 +1,4 @@
-package com.example.todoapp
+package com.example.todoapp.model
 
 sealed interface TaskEvent {
     object AddTask : TaskEvent

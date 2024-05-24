@@ -1,4 +1,4 @@
-package com.example.weather_app.adapter
+package com.example.todoapp.adapter
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -7,11 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.todoapp.CategoryType
+import com.example.todoapp.model.CategoryType
 import com.example.todoapp.R
-import com.example.todoapp.Task
-import com.example.todoapp.TaskViewModel
-import java.util.Locale
+import com.example.todoapp.model.Task
+import com.example.todoapp.view.TaskViewModel
 
 class TaskAdapter (
     private var tasks: List<Task>,

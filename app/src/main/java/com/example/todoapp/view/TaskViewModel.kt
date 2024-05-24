@@ -1,8 +1,12 @@
-package com.example.todoapp
+package com.example.todoapp.view
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todoapp.dao.TaskDao
+import com.example.todoapp.model.CategoryType
+import com.example.todoapp.model.Task
+import com.example.todoapp.model.TaskEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
