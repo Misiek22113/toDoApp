@@ -16,5 +16,6 @@ data class TaskState(
     val isAddingTask: Boolean = false,
     val filter: String = "",
     val isFiltered: CategoryType = CategoryType.NONE,
-    val isDoneTaskFiler: Boolean = false
+    val isDoneTaskFiler: Boolean = false,
+    val query: String = ""
 )

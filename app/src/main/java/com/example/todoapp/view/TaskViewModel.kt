@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -21,26 +22,35 @@ class TaskViewModel(
     private val dao: TaskDao
 ) : ViewModel() {
 
+    private val _query = MutableStateFlow("")
     private val _filterCategoryType = MutableStateFlow(CategoryType.NONE)
     private val _filterDoneTask = MutableStateFlow(false)
     private val _state = MutableStateFlow(TaskState())
-    private val _tasks = combine(_filterDoneTask, _filterCategoryType) { isFiltered, filterType ->
-        when (filterType) {
-            CategoryType.NONE -> dao.getTasks(isFiltered)
-            else -> dao.getTasksByCategory(filterType.name)
-        }
-    }.flatMapLatest { it }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
+    private val _tasks =
+        combine(_filterDoneTask, _filterCategoryType, _query) { isFiltered, filterType, query ->
+            when (filterType) {
+                CategoryType.NONE -> dao.getTasks(isFiltered, query)
+                else -> dao.getTasksByCategory(filterType.name, query)
+            }
+        }.flatMapLatest { it }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     val state = combine(
         _state,
         _tasks,
         _filterDoneTask,
-        _filterCategoryType
-    ) { state, tasks, isFiltered, filterType ->
-        state.copy(tasks = tasks, isDoneTaskFiler = isFiltered, filter = filterType.name)
+        _filterCategoryType,
+        _query
+    ) { state, tasks, isFiltered, filterType, query ->
+        state.copy(
+            tasks = tasks,
+            isDoneTaskFiler = isFiltered,
+            filter = filterType.name,
+            query = query
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskState())
+
 
     fun onEvent(event: TaskEvent) {
         when (event) {
@@ -62,7 +72,8 @@ class TaskViewModel(
 
                 if (title.isBlank() || description.isBlank() ||
                     createTime == 0L || dueTime == 0L ||
-                    category.isBlank()) {
+                    category.isBlank()
+                ) {
                     return
                 }
 
@@ -77,22 +88,22 @@ class TaskViewModel(
                     attachments
                 )
 
-                Log.i("Logcat", "Adding task: $task")
-
                 viewModelScope.launch {
                     dao.upsertTask(task)
                 }
 
-                _state.update { it.copy(
-                    title = "",
-                    description = "",
-                    createTime = 0,
-                    dueTime = 0,
-                    notifications = false,
-                    isCompleted = false,
-                    category = "",
-                    attachments = emptyList()
-                ) }
+                _state.update {
+                    it.copy(
+                        title = "",
+                        description = "",
+                        createTime = 0,
+                        dueTime = 0,
+                        notifications = false,
+                        isCompleted = false,
+                        category = "",
+                        attachments = emptyList()
+                    )
+                }
             }
 
             is TaskEvent.FilterDoneTasks -> {
@@ -149,7 +160,10 @@ class TaskViewModel(
                 _state.update {
                     it.copy(title = event.title)
                 }
-                Log.i("Logcat", "Setting title: ${event.title} to ${_state.value.title}")
+            }
+
+            is TaskEvent.SearchTaskQuery -> {
+                _query.value = event.query
             }
 
             TaskEvent.ShowDialog -> {
@@ -168,5 +182,9 @@ class TaskViewModel(
             TaskEvent.HideDialog -> TODO()
             TaskEvent.ShowDialog -> TODO()
         }
+
+
     }
+
+
 }

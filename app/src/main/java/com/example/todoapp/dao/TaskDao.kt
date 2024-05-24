@@ -15,9 +15,12 @@ interface TaskDao {
     @Delete
     suspend fun deleteTask(task: Task)
 
-    @Query("SELECT * FROM task_table WHERE isCompleted = :isCompleted ORDER BY dueTime ASC")
-    fun getTasks(isCompleted: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task_table WHERE isCompleted = :isCompleted AND title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
+    fun getTasks(isCompleted: Boolean, query: String): Flow<List<Task>>
 
-    @Query("SELECT * FROM task_table WHERE category = :category ORDER BY dueTime ASC")
-    fun getTasksByCategory(category: String): Flow<List<Task>>
+    @Query("SELECT * FROM task_table WHERE category = :category AND title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
+    fun getTasksByCategory(category: String, query: String): Flow<List<Task>>
+
+    @Query("SELECT * FROM task_table WHERE title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
+    fun searchTask(query: String): Flow<List<Task>>
 }

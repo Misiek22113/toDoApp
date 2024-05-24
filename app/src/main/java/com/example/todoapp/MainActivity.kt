@@ -3,11 +3,13 @@ package com.example.todoapp
 import com.example.todoapp.view.BottomSheet
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.AutoCompleteTextView
+import android.widget.SearchView
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +23,8 @@ import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.TaskEvent
 import com.example.todoapp.view.TaskViewModel
 import com.example.todoapp.adapter.TaskAdapter
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -89,6 +93,19 @@ class MainActivity : AppCompatActivity() {
             showAddTaskDialog()
         }
 
+
+        binding.searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.onEvent(TaskEvent.SearchTaskQuery(query ?: ""))
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.onEvent(TaskEvent.SearchTaskQuery(newText ?: ""))
+                return true
+            }
+        })
+
     }
 
     private fun getCategoryType(category: String): CategoryType {
@@ -111,6 +128,11 @@ class MainActivity : AppCompatActivity() {
 
         val builder = MaterialDatePicker.Builder.datePicker()
         builder.setTitleText("Select date")
+        builder.setCalendarConstraints(
+            CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.now())
+                .build()
+        )
         val materialDatePicker = builder.build()
 
         datePicker.editText?.setOnClickListener {

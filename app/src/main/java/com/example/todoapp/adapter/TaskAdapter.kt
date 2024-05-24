@@ -45,6 +45,7 @@ class TaskAdapter (
         return tasks.size
     }
 
+
     fun getTaskCategoryDescription(category: String): String {
         return when (category) {
             CategoryType.WORK.name -> "work"

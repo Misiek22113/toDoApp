@@ -15,4 +15,6 @@ sealed interface TaskEvent {
     data class FilterDoneTasks(val isFiltered: Boolean): TaskEvent
     data class FilterTasks(val filter: CategoryType): TaskEvent
     data class DeleteTask(val task: Task): TaskEvent
+
+    data class SearchTaskQuery(val query: String): TaskEvent
 }
