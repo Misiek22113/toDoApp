@@ -2,6 +2,7 @@ package com.example.todoapp.model
 
 sealed interface TaskEvent {
     object AddTask : TaskEvent
+    data class SetId(val id: Int) : TaskEvent
     data class SetTitle(val title: String) : TaskEvent
     data class SetDescription(val description: String) : TaskEvent
     data class SetCreateTime(val createTime: Long) : TaskEvent

@@ -1,6 +1,5 @@
 package com.example.todoapp.adapter
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,8 @@ import com.example.todoapp.view.TaskViewModel
 
 class TaskAdapter (
     private var tasks: List<Task>,
-    private val viewModel: TaskViewModel
+    private val viewModel: TaskViewModel,
+    private val createDialog: (Task) -> Unit,
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     inner class TaskViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -63,6 +63,11 @@ class TaskAdapter (
             viewModel.onEvent(TaskEvent.SetIsCompleted(isChecked))
             viewModel.onEvent(TaskEvent.UpdateTask(task))
         }
+
+        holder.view.setOnClickListener {
+            createDialog(task)
+        }
+
     }
 
     override fun getItemCount(): Int {

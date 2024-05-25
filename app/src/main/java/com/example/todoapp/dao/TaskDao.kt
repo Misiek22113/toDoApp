@@ -2,7 +2,10 @@ package com.example.todoapp.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import androidx.room.Upsert
 import com.example.todoapp.model.Task
 import kotlinx.coroutines.flow.Flow
@@ -19,4 +22,6 @@ interface TaskDao {
     fun getTasksByCategory(category: String, query: String, isCompleted: Boolean?): Flow<List<Task>>
     @Query("SELECT * FROM task_table WHERE title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
     fun searchTask(query: String): Flow<List<Task>>
+    @Update
+    suspend fun updateTask(task: Task)
 }

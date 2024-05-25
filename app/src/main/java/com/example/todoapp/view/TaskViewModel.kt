@@ -2,10 +2,12 @@ package com.example.todoapp.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todoapp.R
 import com.example.todoapp.dao.TaskDao
 import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.Task
 import com.example.todoapp.model.TaskEvent
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,6 +66,7 @@ class TaskViewModel(
             }
 
             TaskEvent.AddTask -> {
+                val id = _state.value.tasks.size
                 val title = _state.value.title
                 val description = _state.value.description
                 val createTime = _state.value.createTime
@@ -88,7 +91,8 @@ class TaskViewModel(
                     notifications,
                     isCompleted,
                     category,
-                    attachments
+                    attachments,
+                    id
                 )
 
                 viewModelScope.launch {
@@ -97,6 +101,7 @@ class TaskViewModel(
 
                 _state.update {
                     it.copy(
+                        id = 0,
                         title = "",
                         description = "",
                         createTime = 0,
@@ -170,8 +175,12 @@ class TaskViewModel(
             }
 
             is TaskEvent.UpdateTask -> {
-                viewModelScope.launch {
-                    dao.upsertTask(event.task)
+                updateTask(event.task)
+            }
+
+            is TaskEvent.SetId -> {
+                _state.update {
+                    it.copy(id = event.id)
                 }
             }
 
@@ -194,6 +203,10 @@ class TaskViewModel(
 
 
     }
+    private fun updateTask(task: Task) = viewModelScope.launch {
+        dao.updateTask(task)
+    }
+
 
 
 }

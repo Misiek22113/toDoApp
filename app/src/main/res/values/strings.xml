@@ -21,4 +21,7 @@
     <string name="ten_minute">10 min</string>
     <string name="thirty_minute">30 min</string>
     <string name="notifications">Notifications</string>
+    <string name="createdTime">Created at:</string>
+    <string name="apply_changes">Apply changes</string>
+    <string name="edit_task_title">Task Details &amp; Edit</string>
 </resources>

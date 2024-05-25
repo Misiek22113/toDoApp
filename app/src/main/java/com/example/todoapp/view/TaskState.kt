@@ -4,6 +4,7 @@ import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.Task
 
 data class TaskState(
+    val id: Int = 0,
     val tasks: List<Task> = emptyList(),
     val title: String = "",
     val description: String = "",
