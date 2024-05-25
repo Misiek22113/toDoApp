@@ -1,6 +1,5 @@
 package com.example.todoapp.view
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.dao.TaskDao
@@ -11,8 +10,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,8 +26,12 @@ class TaskViewModel(
     private val _filterDoneTask = MutableStateFlow(false)
     private val _state = MutableStateFlow(TaskState())
 
+    private val _filterCondition = _filterDoneTask.map { isFiltered ->
+        if (isFiltered) false else null
+    }
+
     private val _tasks =
-        combine(_filterDoneTask, _filterCategoryType, _query) { isFiltered, filterType, query ->
+        combine(_filterCondition, _filterCategoryType, _query) { isFiltered, filterType, query ->
             when (filterType) {
                 CategoryType.NONE -> dao.getTasks(isFiltered, query)
                 else -> dao.getTasksByCategory(filterType.name, query)
@@ -164,6 +167,12 @@ class TaskViewModel(
 
             is TaskEvent.SearchTaskQuery -> {
                 _query.value = event.query
+            }
+
+            is TaskEvent.UpdateTask -> {
+                viewModelScope.launch {
+                    dao.upsertTask(event.task)
+                }
             }
 
             TaskEvent.ShowDialog -> {

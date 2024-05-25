@@ -6,6 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 
 class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val taskName: TextView = view.findViewById(R.id.taskName)
+    val taskName: TextView = view.findViewById(R.id.taskCheckBox)
     val taskCreationTime: TextView = view.findViewById(R.id.taskCategory)
 }

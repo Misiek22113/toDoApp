@@ -9,7 +9,7 @@ data class Task(
     val createTime: Long,
     val dueTime: Long,
     val notifications: Boolean,
-    val isCompleted: Boolean,
+    var isCompleted: Boolean,
     val category: String,
     val attachments: List<String>,
     @PrimaryKey(autoGenerate = true)

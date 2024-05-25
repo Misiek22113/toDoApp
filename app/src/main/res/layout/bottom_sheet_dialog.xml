@@ -10,9 +10,9 @@
     android:paddingVertical="10dp">
 
     <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/finishedFilterPicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="true"
         android:text="@string/show_finished" />
 
     <com.google.android.material.textfield.TextInputLayout
