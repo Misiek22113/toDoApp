@@ -1,7 +1,5 @@
 package com.example.todoapp.adapter
 
-import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,8 +43,10 @@ class TaskAdapter (
         holder.taskCategory.text = getTaskCategoryDescription(task.category)
 
         val checkBox: CheckBox = holder.view.findViewById(R.id.taskCheckBox)
-        checkBox.isChecked = task.isCompleted
 
+        checkBox.setOnCheckedChangeListener(null)
+
+        checkBox.isChecked = task.isCompleted
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             task.isCompleted = isChecked
             viewModel.onEvent(TaskEvent.SetIsCompleted(isChecked))
@@ -57,7 +57,6 @@ class TaskAdapter (
     override fun getItemCount(): Int {
         return tasks.size
     }
-
 
     private fun getTaskCategoryDescription(category: String): String {
         return when (category) {

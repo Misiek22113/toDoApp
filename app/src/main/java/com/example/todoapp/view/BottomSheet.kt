@@ -47,7 +47,7 @@ class BottomSheet : BottomSheetDialogFragment() {
         }
 
         val notificationTimeToggleButton = view.findViewById<MaterialButtonToggleGroup>(R.id.notificationTimeToggleButton)
-        notificationTimeToggleButton.check(R.id.buttonNone)
+        notificationTimeToggleButton.check(R.id.oneMinute)
 
         notificationTimeToggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {

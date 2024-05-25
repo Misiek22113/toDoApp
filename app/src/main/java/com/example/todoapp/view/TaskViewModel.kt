@@ -34,7 +34,7 @@ class TaskViewModel(
         combine(_filterCondition, _filterCategoryType, _query) { isFiltered, filterType, query ->
             when (filterType) {
                 CategoryType.NONE -> dao.getTasks(isFiltered, query)
-                else -> dao.getTasksByCategory(filterType.name, query)
+                else -> dao.getTasksByCategory(filterType.name, query, isFiltered)
             }
         }.flatMapLatest { it }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())

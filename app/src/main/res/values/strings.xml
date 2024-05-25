@@ -8,7 +8,7 @@
     <string name="task_category_hint">Task category</string>
     <string name="add_new_task">Add new task</string>
     <string name="add_task">Add Task</string>
-    <string name="show_finished">Show finished tasks</string>
+    <string name="show_finished">Hide finished tasks</string>
     <string name="add_task_dialog_title">Add new Task</string>
     <string name="cancel">cancel</string>
     <string name="accept">accept</string>
