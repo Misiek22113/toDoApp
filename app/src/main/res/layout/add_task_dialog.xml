@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="300dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="#00FFFFFF"
     android:backgroundTint="#00FFFFFF"
@@ -45,28 +45,46 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/menu"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginVertical="15dp"
-        android:layout_weight="1"
-        android:hint="@string/task_category_hint"
-        app:layout_constraintBottom_toTopOf="@+id/taskTitle"
-        tools:layout_editor_absoluteX="15dp">
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/categoryToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:singleSelection="true"
+        android:paddingVertical="15dp">
 
-        <AutoCompleteTextView
-            android:id="@+id/menuCategory"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/buttonNone"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            app:simpleItems="@array/simple_items" />
+            app:icon="@drawable/none_icon"/>
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/buttonWork"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/work_icon" />
+
+        <Button
+            android:id="@+id/buttonSchool"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/school_icon"/>
+
+        <Button
+            android:id="@+id/buttonHome"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/home_icon" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">

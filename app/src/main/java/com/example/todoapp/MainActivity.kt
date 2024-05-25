@@ -23,6 +23,7 @@ import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.TaskEvent
 import com.example.todoapp.view.TaskViewModel
 import com.example.todoapp.adapter.TaskAdapter
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -109,23 +110,29 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getCategoryType(category: String): CategoryType {
-        return when (category) {
-            "work" -> CategoryType.WORK
-            "school" -> CategoryType.SCHOOL
-            "home" -> CategoryType.HOME
-            else -> CategoryType.NONE
-        }
-    }
-
     private fun showAddTaskDialog() {
         val dialogView = layoutInflater.inflate(R.layout.add_task_dialog, null)
 
         val taskTitleText = dialogView.findViewById<TextInputLayout>(R.id.taskTitle)
         val taskDescriptionText = dialogView.findViewById<TextInputLayout>(R.id.taskDescription)
-        val category = dialogView.findViewById<AutoCompleteTextView>(R.id.menuCategory)
+        val categoryToggleButton = dialogView.findViewById<MaterialButtonToggleGroup>(R.id.categoryToggleButton)
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
+        var category: CategoryType = CategoryType.NONE
+
+        categoryToggleButton.check(R.id.buttonNone)
+
+        categoryToggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.buttonNone -> category = CategoryType.NONE
+                    R.id.buttonWork -> category = CategoryType.WORK
+                    R.id.buttonSchool ->  category = CategoryType.SCHOOL
+                    R.id.buttonHome ->  category = CategoryType.HOME
+                    R.id.buttonNone ->  category = CategoryType.NONE
+                }
+            }
+        }
 
         val builder = MaterialDatePicker.Builder.datePicker()
         builder.setTitleText("Select due date")
@@ -154,20 +161,20 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
-                addTaskToDatabase(title, description, dueDate, category.text.toString(), notificationsSwitch.isChecked)
+                addTaskToDatabase(title, description, dueDate, category, notificationsSwitch.isChecked)
             }.setView(dialogView)
 
         dialog.show()
     }
 
-    private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: String, notifications: Boolean = false) {
+    private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: CategoryType, notifications: Boolean = false) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
             viewModel.onEvent(TaskEvent.SetTitle(title))
             viewModel.onEvent(TaskEvent.SetDescription(description))
             viewModel.onEvent(TaskEvent.SetIsCompleted(false))
             viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
             viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
-            viewModel.onEvent(TaskEvent.SetCategory(getCategoryType(category)))
+            viewModel.onEvent(TaskEvent.SetCategory(category))
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.AddTask)
         }
