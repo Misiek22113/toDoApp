@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.todoapp.R
+import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.TaskEvent
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.materialswitch.MaterialSwitch
 
 class BottomSheet : BottomSheetDialogFragment() {
@@ -29,6 +31,38 @@ class BottomSheet : BottomSheetDialogFragment() {
             viewModel.onEvent(TaskEvent.FilterDoneTasks(isChecked))
         }
 
+        val categoryToggleButton = view.findViewById<MaterialButtonToggleGroup>(R.id.categoryToggleButton)
+        categoryToggleButton.check(R.id.buttonNone)
+
+        categoryToggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.buttonNone -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.NONE))
+                    R.id.buttonWork -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.WORK))
+                    R.id.buttonSchool -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.SCHOOL))
+                    R.id.buttonHome -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.HOME))
+                    R.id.buttonNone -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.NONE))
+                }
+            }
+        }
+
+        val notificationTimeToggleButton = view.findViewById<MaterialButtonToggleGroup>(R.id.notificationTimeToggleButton)
+        notificationTimeToggleButton.check(R.id.buttonNone)
+
+        notificationTimeToggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.oneMinute -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.NONE))
+                    R.id.fiveMinute -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.WORK))
+                    R.id.tenMinute -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.SCHOOL))
+                    R.id.thirtyMinute -> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.HOME))
+                    R.id.oneMinute-> viewModel.onEvent(TaskEvent.FilterTasks(CategoryType.NONE))
+                }
+            }
+        }
+
+
         return view
     }
+
 }

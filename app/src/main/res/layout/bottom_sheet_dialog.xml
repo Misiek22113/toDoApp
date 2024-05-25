@@ -15,43 +15,79 @@
         android:layout_height="wrap_content"
         android:text="@string/show_finished" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/categoryFilterPicker"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginVertical="15dp"
-        android:layout_weight="1"
-        android:hint="@string/task_category_hint"
-        app:layout_constraintBottom_toTopOf="@+id/taskTitle">
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/categoryToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:singleSelection="true"
+        android:paddingVertical="15dp">
 
-        <AutoCompleteTextView
-            android:id="@+id/menuCategoryFilterPicker"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/buttonNone"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            app:simpleItems="@array/simple_items" />
+            android:text="@string/none" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/notificationsFilterPicker"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginVertical="15dp"
-        android:layout_weight="1"
-        android:hint="@string/task_category_hint"
-        app:layout_constraintBottom_toTopOf="@+id/taskTitle">
-
-        <AutoCompleteTextView
-            android:id="@+id/menuNotificationsFilterPicker"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/buttonWork"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            app:simpleItems="@array/simple_items" />
+            android:text="@string/work" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/buttonSchool"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/school" />
+
+        <Button
+            android:id="@+id/buttonHome"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/home" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/notificationTimeToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:singleSelection="true"
+        android:paddingVertical="15dp">
+
+        <Button
+            android:id="@+id/oneMinute"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/one_minute" />
+
+        <Button
+            android:id="@+id/fiveMinute"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/five_minute" />
+
+        <Button
+            android:id="@+id/tenMinute"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ten_minute" />
+
+        <Button
+            android:id="@+id/thirtyMinute"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/thirty_minute" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
 </LinearLayout>
 

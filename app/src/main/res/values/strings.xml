@@ -12,6 +12,12 @@
     <string name="add_task_dialog_title">Add new Task</string>
     <string name="cancel">cancel</string>
     <string name="accept">accept</string>
-    <!--    <string name="">label_2</string>-->
-<!--    <string name="label_3">label_3</string>-->
+    <string name="work">work</string>
+    <string name="none">none</string>
+    <string name="school">school</string>
+    <string name="home">home</string>
+    <string name="one_minute">1 min</string>
+    <string name="five_minute">5 min</string>
+    <string name="ten_minute">10 min</string>
+    <string name="thirty_minute">30 min</string>
 </resources>
