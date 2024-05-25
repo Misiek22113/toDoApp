@@ -20,4 +20,5 @@
     <string name="five_minute">5 min</string>
     <string name="ten_minute">10 min</string>
     <string name="thirty_minute">30 min</string>
+    <string name="notifications">Notifications</string>
 </resources>

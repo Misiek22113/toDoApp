@@ -27,6 +27,7 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
@@ -124,28 +125,25 @@ class MainActivity : AppCompatActivity() {
         val taskDescriptionText = dialogView.findViewById<TextInputLayout>(R.id.taskDescription)
         val category = dialogView.findViewById<AutoCompleteTextView>(R.id.menuCategory)
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
-        val dateEditText = dialogView.findViewById<TextInputEditText>(R.id.dateEditText)
+        val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
 
         val builder = MaterialDatePicker.Builder.datePicker()
-        builder.setTitleText("Select date")
+        builder.setTitleText("Select due date")
         builder.setCalendarConstraints(
             CalendarConstraints.Builder()
                 .setValidator(DateValidatorPointForward.now())
                 .build()
         )
+
         val materialDatePicker = builder.build()
 
-        datePicker.editText?.setOnClickListener {
+        datePicker.setOnClickListener {
             materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
         }
 
         var dueDate: Long = 0
 
-        materialDatePicker.addOnPositiveButtonClickListener {
-            val selectedDate = it
-            val dateString =
-                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(selectedDate))
-            dateEditText.setText(dateString)
+        materialDatePicker.addOnPositiveButtonClickListener { selectedDate ->
             dueDate = selectedDate
         }
 
@@ -156,12 +154,13 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
-                addTaskToDatabase(title, description, dueDate, category.text.toString())
+                addTaskToDatabase(title, description, dueDate, category.text.toString(), notificationsSwitch.isChecked)
             }.setView(dialogView)
 
         dialog.show()
     }
-    private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: String) {
+
+    private fun addTaskToDatabase(title: String, description: String, dueDate: Long, category: String, notifications: Boolean = false) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
             viewModel.onEvent(TaskEvent.SetTitle(title))
             viewModel.onEvent(TaskEvent.SetDescription(description))
@@ -169,6 +168,7 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetCreateTime(System.currentTimeMillis()))
             viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
             viewModel.onEvent(TaskEvent.SetCategory(getCategoryType(category)))
+            viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.AddTask)
         }
     }
