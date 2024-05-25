@@ -1,9 +1,11 @@
 package com.example.todoapp.adapter
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +22,7 @@ class TaskAdapter (
 
     inner class TaskViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val taskTextView: TextView = view.findViewById(R.id.taskCheckBox)
-        val taskCategory: TextView = view.findViewById(R.id.taskCategory)
+        val taskCategory: ImageView = view.findViewById(R.id.taskCategory)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -40,7 +42,16 @@ class TaskAdapter (
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
         holder.taskTextView.text = task.title
-        holder.taskCategory.text = getTaskCategoryDescription(task.category)
+
+        val categoryImage = when (task.category) {
+            CategoryType.WORK.name -> R.drawable.work_icon
+            CategoryType.SCHOOL.name -> R.drawable.school_icon
+            CategoryType.HOME.name -> R.drawable.home_icon
+            else -> R.drawable.none_icon
+        }
+
+        holder.taskCategory.setImageResource(categoryImage)
+
 
         val checkBox: CheckBox = holder.view.findViewById(R.id.taskCheckBox)
 
@@ -58,14 +69,6 @@ class TaskAdapter (
         return tasks.size
     }
 
-    private fun getTaskCategoryDescription(category: String): String {
-        return when (category) {
-            CategoryType.WORK.name -> "work"
-            CategoryType.SCHOOL.name -> "school"
-            CategoryType.HOME.name -> "home"
-            else -> ""
-        }
-    }
 }
 
 class TaskDiffCallback(
