@@ -1,5 +1,6 @@
 package com.example.todoapp.view
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.R
@@ -129,6 +130,7 @@ class TaskViewModel(
                 _state.update {
                     it.copy(attachments = event.attachments)
                 }
+                Log.i("Logcat", "TaskViewModel Attachments: ${event.attachments}")
             }
 
             is TaskEvent.SetCategory -> {

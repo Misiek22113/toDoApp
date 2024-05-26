@@ -40,16 +40,6 @@
 
     </SearchView>
 
-    <Button
-        android:id="@+id/pick_file_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pick File"
-        app:layout_constraintEnd_toStartOf="@+id/settingsButton"
-        app:layout_constraintStart_toEndOf="@+id/search_bar"
-        tools:ignore="MissingConstraints" />
-
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

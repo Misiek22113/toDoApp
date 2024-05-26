@@ -45,7 +45,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.Manifest
-import android.widget.Button
+import android.util.Log
+
+typealias FilePathCallback = (String) -> Unit
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,7 +55,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: TaskAdapter
 
     private val REQUEST_CODE_PERMISSION = 1
-    private val REQUEST_CODE_PICK_FILE = 2
 
     private val db by lazy {
         Room.databaseBuilder(
@@ -90,11 +91,6 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
-
-        val pickFileButton = findViewById<Button>(R.id.pick_file_button)
-        pickFileButton.setOnClickListener {
-            pickFile()
         }
 
         adapter = TaskAdapter(emptyList(), viewModel, ::createEditTaskDialog)
@@ -143,7 +139,16 @@ class MainActivity : AppCompatActivity() {
             dialogView.findViewById<MaterialButtonToggleGroup>(R.id.categoryToggleButton)
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
+        val addFileButton = dialogView.findViewById<TextInputLayout>(R.id.addFile)
         var category: CategoryType = CategoryType.NONE
+        val filePaths = mutableListOf<String>()
+
+        addFileButton.setOnClickListener {
+            pickFile { copiedFilePath ->
+                filePaths.add(copiedFilePath)
+                Log.i("Logcat", "Copied file path: $filePaths")
+            }
+        }
 
         categoryToggleButton.check(R.id.buttonNone)
 
@@ -186,12 +191,14 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
+                Log.i("Logcat", "File paths in accept: $filePaths")
                 addTaskToDatabase(
                     title,
                     description,
                     dueDate,
                     category,
-                    notificationsSwitch.isChecked
+                    notificationsSwitch.isChecked,
+                    filePaths = filePaths
                 )
             }.setView(dialogView)
 
@@ -292,7 +299,8 @@ class MainActivity : AppCompatActivity() {
         category: CategoryType,
         notifications: Boolean = false,
         createTime: Long = System.currentTimeMillis(),
-        isCompleted: Boolean = false
+        isCompleted: Boolean = false,
+        filePaths: List<String>? = null
     ) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
             viewModel.onEvent(TaskEvent.SetTitle(title))
@@ -302,6 +310,7 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
             viewModel.onEvent(TaskEvent.SetCategory(category))
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
+            viewModel.onEvent(TaskEvent.SetAttachments(filePaths ?: emptyList()))
             viewModel.onEvent(TaskEvent.AddTask)
         }
     }
@@ -335,23 +344,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == REQUEST_CODE_PERMISSION) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                // Uprawnienia przyznane, możesz kontynuować
-//            } else {
-//                // Uprawnienia odrzucone, poinformuj użytkownika
-//            }
-//        }
-//    }
+    private var callback: FilePathCallback? = null
 
-    private fun pickFile() {
+    fun pickFile(callback: FilePathCallback) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
         }
         pickFileLauncher.launch(intent)
+        this.callback = callback
     }
 
     private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -359,13 +360,13 @@ class MainActivity : AppCompatActivity() {
             val uri: Uri? = result.data?.data
             val fileName: String = result.data?.data?.path.toString().substringAfterLast("/")
             if (uri != null) {
-                contentResolver.openInputStream(uri)
-                copyFileToAppDirectory(uri, fileName)
+                val copiedFilePath = copyFileToAppDirectory(uri, fileName)
+                callback?.invoke(copiedFilePath ?: "")
             }
         }
     }
 
-    private fun copyFileToAppDirectory(uri: Uri, fileName: String?) {
+    private fun copyFileToAppDirectory(uri: Uri, fileName: String?): String? {
         try {
             val inputStream = contentResolver.openInputStream(uri)
             if (inputStream != null) {
@@ -384,12 +385,13 @@ class MainActivity : AppCompatActivity() {
                 outputStream.flush()
                 inputStream.close()
                 outputStream.close()
+                return file.absolutePath
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        return null
     }
-
 
     private fun formatDate(timestamp: Long): String {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -405,3 +407,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
