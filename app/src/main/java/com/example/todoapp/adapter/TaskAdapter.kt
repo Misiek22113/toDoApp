@@ -23,6 +23,7 @@ class TaskAdapter (
     inner class TaskViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val taskTextView: TextView = view.findViewById(R.id.taskCheckBox)
         val taskCategory: ImageView = view.findViewById(R.id.taskCategory)
+        val attachmentIndicator: ImageView = view.findViewById(R.id.attachmentIndicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -52,6 +53,11 @@ class TaskAdapter (
 
         holder.taskCategory.setImageResource(categoryImage)
 
+        holder.attachmentIndicator.visibility = if (task.attachments.isNotEmpty()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
 
         val checkBox: CheckBox = holder.view.findViewById(R.id.taskCheckBox)
 
