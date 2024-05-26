@@ -1,5 +1,6 @@
 package com.example.todoapp
 
+import TaskAlarmReceiver
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -45,7 +46,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.Manifest
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.os.Build
 import android.util.Log
+import java.util.concurrent.TimeUnit
 
 typealias FilePathCallback = (String) -> Unit
 
@@ -74,14 +82,22 @@ class MainActivity : AppCompatActivity() {
         }
     )
 
+
     @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        setupNotificationChannel()
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE_PERMISSION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_CODE_PERMISSION
+            )
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -312,6 +328,18 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.SetAttachments(filePaths ?: emptyList()))
             viewModel.onEvent(TaskEvent.AddTask)
+            scheduleTaskNotification(
+                Task(
+                    title,
+                    description,
+                    createTime,
+                    dueDate,
+                    notifications,
+                    isCompleted,
+                    category.toString(),
+                    filePaths!!
+                )
+            )
         }
     }
 
@@ -355,16 +383,17 @@ class MainActivity : AppCompatActivity() {
         this.callback = callback
     }
 
-    private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri: Uri? = result.data?.data
-            val fileName: String = result.data?.data?.path.toString().substringAfterLast("/")
-            if (uri != null) {
-                val copiedFilePath = copyFileToAppDirectory(uri, fileName)
-                callback?.invoke(copiedFilePath ?: "")
+    private val pickFileLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri: Uri? = result.data?.data
+                val fileName: String = result.data?.data?.path.toString().substringAfterLast("/")
+                if (uri != null) {
+                    val copiedFilePath = copyFileToAppDirectory(uri, fileName)
+                    callback?.invoke(copiedFilePath ?: "")
+                }
             }
         }
-    }
 
     private fun copyFileToAppDirectory(uri: Uri, fileName: String?): String? {
         try {
@@ -405,6 +434,40 @@ class MainActivity : AppCompatActivity() {
             CategoryType.HOME.toString() -> CategoryType.HOME
             else -> CategoryType.NONE
         }
+    }
+
+    private fun setupNotificationChannel() {
+        val name = "Task Notification"
+        val descriptionText = "Task Notification Channel"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel("task_channel", name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    @SuppressLint("ScheduleExactAlarm")
+    fun scheduleTaskNotification(task: Task) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, TaskAlarmReceiver::class.java).apply {
+            putExtra("title", task.title)
+            putExtra("content", "Your task '${task.title}' is due soon.")
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            task.id.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        alarmManager.cancel(pendingIntent)
+
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        val notificationTime = sharedPref.getInt("NOTIFICATION_TIME", 10)
+
+        val triggerAtMillis = task.dueTime - TimeUnit.MINUTES.toMillis(notificationTime.toLong())
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
     }
 }
 
