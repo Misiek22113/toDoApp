@@ -10,7 +10,7 @@
     <string name="add_task">Add Task</string>
     <string name="show_finished">Hide finished tasks</string>
     <string name="add_task_dialog_title">Add new Task</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="accept">accept</string>
     <string name="work">work</string>
     <string name="none">none</string>
@@ -23,5 +23,6 @@
     <string name="notifications">Notifications</string>
     <string name="createdTime">Created at:</string>
     <string name="apply_changes">Apply changes</string>
+    <string name="delete_task">Delete task</string>
     <string name="edit_task_title">Task Details &amp; Edit</string>
 </resources>

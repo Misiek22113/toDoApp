@@ -66,7 +66,6 @@ class TaskViewModel(
             }
 
             TaskEvent.AddTask -> {
-                val id = _state.value.tasks.size
                 val title = _state.value.title
                 val description = _state.value.description
                 val createTime = _state.value.createTime
@@ -92,7 +91,6 @@ class TaskViewModel(
                     isCompleted,
                     category,
                     attachments,
-                    id
                 )
 
                 viewModelScope.launch {
@@ -101,7 +99,6 @@ class TaskViewModel(
 
                 _state.update {
                     it.copy(
-                        id = 0,
                         title = "",
                         description = "",
                         createTime = 0,
@@ -111,6 +108,12 @@ class TaskViewModel(
                         category = "",
                         attachments = emptyList()
                     )
+                }
+            }
+
+            is TaskEvent.UpdateTask -> {
+                viewModelScope.launch {
+                    dao.updateTask(event.task)
                 }
             }
 
@@ -174,10 +177,6 @@ class TaskViewModel(
                 _query.value = event.query
             }
 
-            is TaskEvent.UpdateTask -> {
-                updateTask(event.task)
-            }
-
             is TaskEvent.SetId -> {
                 _state.update {
                     it.copy(id = event.id)
@@ -203,10 +202,5 @@ class TaskViewModel(
 
 
     }
-    private fun updateTask(task: Task) = viewModelScope.launch {
-        dao.updateTask(task)
-    }
-
-
 
 }

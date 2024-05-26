@@ -32,6 +32,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -160,7 +163,6 @@ class MainActivity : AppCompatActivity() {
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
                 addTaskToDatabase(
-                    null,
                     title,
                     description,
                     dueDate,
@@ -172,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun createEditTaskDialog(task: Task) {
         val dialogView = layoutInflater.inflate(R.layout.edit_task_dialog, null)
 
@@ -183,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
 
-        createdTimeText.text = task.createTime.toString()
+        createdTimeText.text =  "Created at: ${formatDate(task.createTime)}"
         taskTitleText.editText?.setText(task.title)
         taskDescriptionText.editText?.setText(task.description)
         notificationsSwitch.isChecked = task.notifications
@@ -197,7 +200,7 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        var category: CategoryType = CategoryType.NONE
+        var category: CategoryType = getCategoryType(task.category)
 
         categoryToggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -225,7 +228,7 @@ class MainActivity : AppCompatActivity() {
             materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
         }
 
-        var dueDate: Long = 0
+        var dueDate: Long = task.dueTime
 
         materialDatePicker.addOnPositiveButtonClickListener { selectedDate ->
             dueDate = selectedDate
@@ -238,7 +241,7 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.apply_changes)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
-                addTaskToDatabase(
+                updateTaskInDatabase(
                     task.id,
                     title,
                     description,
@@ -253,8 +256,28 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
     private fun addTaskToDatabase(
+        title: String,
+        description: String,
+        dueDate: Long,
+        category: CategoryType,
+        notifications: Boolean = false,
+        createTime: Long = System.currentTimeMillis(),
+        isCompleted: Boolean = false
+    ) {
+        if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
+            viewModel.onEvent(TaskEvent.SetTitle(title))
+            viewModel.onEvent(TaskEvent.SetDescription(description))
+            viewModel.onEvent(TaskEvent.SetIsCompleted(isCompleted))
+            viewModel.onEvent(TaskEvent.SetCreateTime(createTime))
+            viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
+            viewModel.onEvent(TaskEvent.SetCategory(category))
+            viewModel.onEvent(TaskEvent.SetNotifications(notifications))
+            viewModel.onEvent(TaskEvent.AddTask)
+        }
+    }
+
+    private fun updateTaskInDatabase(
         taskId: Int? = null,
         title: String,
         description: String,
@@ -265,15 +288,35 @@ class MainActivity : AppCompatActivity() {
         isCompleted: Boolean = false
     ) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
-            viewModel.onEvent(TaskEvent.SetId(taskId ?: 0))
-            viewModel.onEvent(TaskEvent.SetTitle(title))
-            viewModel.onEvent(TaskEvent.SetDescription(description))
-            viewModel.onEvent(TaskEvent.SetIsCompleted(isCompleted))
-            viewModel.onEvent(TaskEvent.SetCreateTime(createTime))
-            viewModel.onEvent(TaskEvent.SetDueTime(dueDate))
-            viewModel.onEvent(TaskEvent.SetCategory(category))
-            viewModel.onEvent(TaskEvent.SetNotifications(notifications))
-            viewModel.onEvent(TaskEvent.AddTask)
+            viewModel.onEvent(
+                TaskEvent.UpdateTask(
+                    Task(
+                        title,
+                        description,
+                        createTime,
+                        dueDate,
+                        notifications,
+                        isCompleted,
+                        category.toString(),
+                        emptyList(),
+                        taskId
+                    )
+                )
+            )
+        }
+    }
+
+    fun formatDate(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
+
+    private fun getCategoryType(category: String): CategoryType {
+        return when (category) {
+            CategoryType.WORK.toString() -> CategoryType.WORK
+            CategoryType.SCHOOL.toString() -> CategoryType.SCHOOL
+            CategoryType.HOME.toString() -> CategoryType.HOME
+            else -> CategoryType.NONE
         }
     }
 }
