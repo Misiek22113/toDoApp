@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
 
-        createdTimeText.text =  "Created at: ${formatDate(task.createTime)}"
+        createdTimeText.text = "Created at: ${formatDate(task.createTime)}"
         taskTitleText.editText?.setText(task.title)
         taskDescriptionText.editText?.setText(task.description)
         notificationsSwitch.isChecked = task.notifications
@@ -236,7 +236,12 @@ class MainActivity : AppCompatActivity() {
 
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(resources.getString(R.string.edit_task_title))
+            .setNegativeButton(resources.getString(R.string.delete_task)) { dialog, which ->
+                if (task.id != null)
+                    viewModel.onEvent(TaskEvent.DeleteTaskById(task.id))
+            }
             .setNeutralButton(resources.getString(R.string.cancel)) { dialog, which ->
+                dialog.dismiss()
             }
             .setPositiveButton(resources.getString(R.string.apply_changes)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()

@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.Flow
 interface TaskDao {
     @Upsert
     suspend fun upsertTask(task: Task)
-    @Delete
-    suspend fun deleteTask(task: Task)
+    @Query("DELETE FROM task_table WHERE id = :taskId")
+    suspend fun deleteTaskById(taskId: Int);
     @Query("SELECT * FROM task_table WHERE (:isCompleted IS NULL OR isCompleted = :isCompleted) AND title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
     fun getTasks(isCompleted: Boolean?, query: String): Flow<List<Task>>
     @Query("SELECT * FROM task_table WHERE category = :category AND  (:isCompleted IS NULL OR isCompleted = :isCompleted) AND title LIKE '%' || :query || '%' ORDER BY dueTime ASC")

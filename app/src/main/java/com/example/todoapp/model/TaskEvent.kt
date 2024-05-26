@@ -15,7 +15,7 @@ sealed interface TaskEvent {
     object HideDialog: TaskEvent
     data class FilterDoneTasks(val isFiltered: Boolean): TaskEvent
     data class FilterTasks(val filter: CategoryType): TaskEvent
-    data class DeleteTask(val task: Task): TaskEvent
+    data class DeleteTaskById(val taskId: Int): TaskEvent
     data class SearchTaskQuery(val query: String): TaskEvent
     data class UpdateTask(val task: Task): TaskEvent
 }

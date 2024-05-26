@@ -59,9 +59,9 @@ class TaskViewModel(
 
     fun onEvent(event: TaskEvent) {
         when (event) {
-            is TaskEvent.DeleteTask -> {
+            is TaskEvent.DeleteTaskById -> {
                 viewModelScope.launch {
-                    dao.deleteTask(event.task)
+                    dao.deleteTaskById(event.taskId)
                 }
             }
 
