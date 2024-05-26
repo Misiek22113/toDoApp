@@ -1,29 +1,35 @@
 package com.example.todoapp
 
-import com.example.todoapp.view.BottomSheet
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.widget.SearchView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.example.todoapp.adapter.TaskAdapter
 import com.example.todoapp.database.TaskDatabase
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.todoapp.model.CategoryType
-import com.example.todoapp.model.TaskEvent
-import com.example.todoapp.view.TaskViewModel
-import com.example.todoapp.adapter.TaskAdapter
 import com.example.todoapp.model.Task
+import com.example.todoapp.model.TaskEvent
+import com.example.todoapp.view.BottomSheet
+import com.example.todoapp.view.TaskViewModel
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
@@ -32,14 +38,22 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.Manifest
+import android.widget.Button
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: TaskAdapter
+
+    private val REQUEST_CODE_PERMISSION = 1
+    private val REQUEST_CODE_PICK_FILE = 2
 
     private val db by lazy {
         Room.databaseBuilder(
@@ -64,6 +78,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE_PERMISSION)
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -71,6 +90,11 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val pickFileButton = findViewById<Button>(R.id.pick_file_button)
+        pickFileButton.setOnClickListener {
+            pickFile()
         }
 
         adapter = TaskAdapter(emptyList(), viewModel, ::createEditTaskDialog)
@@ -311,7 +335,63 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun formatDate(timestamp: Long): String {
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == REQUEST_CODE_PERMISSION) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Uprawnienia przyznane, możesz kontynuować
+//            } else {
+//                // Uprawnienia odrzucone, poinformuj użytkownika
+//            }
+//        }
+//    }
+
+    private fun pickFile() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
+        pickFileLauncher.launch(intent)
+    }
+
+    private val pickFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            val fileName: String = result.data?.data?.path.toString().substringAfterLast("/")
+            if (uri != null) {
+                contentResolver.openInputStream(uri)
+                copyFileToAppDirectory(uri, fileName)
+            }
+        }
+    }
+
+    private fun copyFileToAppDirectory(uri: Uri, fileName: String?) {
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val directory = File(filesDir, "files")
+                if (!directory.exists()) {
+                    directory.mkdir()
+                }
+
+                val file = File(directory, fileName ?: "file.txt")
+                val outputStream = FileOutputStream(file)
+                val buffer = ByteArray(1024)
+                var length: Int
+                while (inputStream.read(buffer).also { length = it } > 0) {
+                    outputStream.write(buffer, 0, length)
+                }
+                outputStream.flush()
+                inputStream.close()
+                outputStream.close()
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+
+    private fun formatDate(timestamp: Long): String {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return sdf.format(Date(timestamp))
     }
