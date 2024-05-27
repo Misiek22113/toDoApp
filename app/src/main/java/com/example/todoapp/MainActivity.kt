@@ -47,12 +47,13 @@ import java.util.Date
 import java.util.Locale
 import android.Manifest
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.os.Build
+import java.util.Calendar
 import android.util.Log
+import com.example.todoapp.util.TaskNotificationService
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import java.util.concurrent.TimeUnit
 
 typealias FilePathCallback = (String) -> Unit
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: TaskAdapter
+    private lateinit var service: TaskNotificationService;
 
     private val REQUEST_CODE_PERMISSION = 1
 
@@ -87,8 +89,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        setupNotificationChannel()
+        service = TaskNotificationService(this)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -156,6 +157,8 @@ class MainActivity : AppCompatActivity() {
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
         val addFileButton = dialogView.findViewById<TextInputLayout>(R.id.addFile)
+        val hourInput = dialogView.findViewById<TextInputLayout>(R.id.hourInput)
+
         var category: CategoryType = CategoryType.NONE
         val filePaths = mutableListOf<String>()
 
@@ -178,6 +181,27 @@ class MainActivity : AppCompatActivity() {
                     R.id.buttonNone -> category = CategoryType.NONE
                 }
             }
+        }
+
+        val picker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(12)
+                .setMinute(10)
+                .setTitleText("Select due time")
+                .build()
+
+        var dueHour = 0
+        var dueMinute = 0
+
+        picker.addOnPositiveButtonClickListener {
+            dueHour = picker.hour
+            dueMinute = picker.minute
+            Log.i("Logcat", "Due time: $dueHour:$dueMinute")
+        }
+
+        hourInput.setOnClickListener {
+            picker.show(supportFragmentManager, "TIME_PICKER")
         }
 
         val builder = MaterialDatePicker.Builder.datePicker()
@@ -207,11 +231,10 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
-                Log.i("Logcat", "File paths in accept: $filePaths")
                 addTaskToDatabase(
                     title,
                     description,
-                    dueDate,
+                    getFinalTime(dueDate, dueHour, dueMinute),
                     category,
                     notificationsSwitch.isChecked,
                     filePaths = filePaths
@@ -328,18 +351,19 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.SetAttachments(filePaths ?: emptyList()))
             viewModel.onEvent(TaskEvent.AddTask)
-            scheduleTaskNotification(
-                Task(
-                    title,
-                    description,
-                    createTime,
-                    dueDate,
-                    notifications,
-                    isCompleted,
-                    category.toString(),
-                    filePaths!!
-                )
-            )
+            service.showNotification(title, "Your task '$title' is due soon.", 0)
+//            scheduleTaskNotification(
+//                Task(
+//                    title,
+//                    description,
+//                    createTime,
+//                    dueDate,
+//                    notifications,
+//                    isCompleted,
+//                    category.toString(),
+//                    filePaths!!
+//                )
+//            )
         }
     }
 
@@ -422,6 +446,16 @@ class MainActivity : AppCompatActivity() {
         return null
     }
 
+
+    private fun getFinalTime(dueDate: Long, hours: Int, minutes: Int): Long {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = dueDate
+            add(Calendar.HOUR_OF_DAY, hours)
+            add(Calendar.MINUTE, minutes)
+        }
+        return calendar.timeInMillis
+    }
+
     private fun formatDate(timestamp: Long): String {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return sdf.format(Date(timestamp))
@@ -436,16 +470,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupNotificationChannel() {
-        val name = "Task Notification"
-        val descriptionText = "Task Notification Channel"
-        val importance = NotificationManager.IMPORTANCE_HIGH
-        val channel = NotificationChannel("task_channel", name, importance).apply {
-            description = descriptionText
-        }
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
-    }
 
     @SuppressLint("ScheduleExactAlarm")
     fun scheduleTaskNotification(task: Task) {
@@ -454,11 +478,12 @@ class MainActivity : AppCompatActivity() {
             putExtra("title", task.title)
             putExtra("content", "Your task '${task.title}' is due soon.")
         }
+
         val pendingIntent = PendingIntent.getBroadcast(
             this,
             task.id.hashCode(),
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         alarmManager.cancel(pendingIntent)
