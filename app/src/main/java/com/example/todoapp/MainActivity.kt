@@ -1,6 +1,6 @@
 package com.example.todoapp
 
-import TaskAlarmReceiver
+import com.example.todoapp.alarm.TaskAlarmReceiver
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -51,6 +51,7 @@ import android.app.PendingIntent
 import android.content.Context
 import java.util.Calendar
 import android.util.Log
+import com.example.todoapp.alarm.TaskAlarmScheduler
 import com.example.todoapp.util.TaskNotificationService
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -62,7 +63,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: TaskAdapter
-    private lateinit var service: TaskNotificationService;
+    private lateinit var service: TaskNotificationService
+    private lateinit var taskAlarmManager: TaskAlarmScheduler;
 
     private val REQUEST_CODE_PERMISSION = 1
 
@@ -90,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         service = TaskNotificationService(this)
+        taskAlarmManager = TaskAlarmScheduler(this)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED
@@ -351,7 +354,13 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.SetAttachments(filePaths ?: emptyList()))
             viewModel.onEvent(TaskEvent.AddTask)
-            service.showNotification(title, "Your task '$title' is due soon.", 0)
+            val triggerTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)
+            taskAlarmManager.scheduleAlarm(
+                2,
+                triggerTime,
+                title,
+                description
+            )
 //            scheduleTaskNotification(
 //                Task(
 //                    title,
@@ -470,29 +479,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    @SuppressLint("ScheduleExactAlarm")
-    fun scheduleTaskNotification(task: Task) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, TaskAlarmReceiver::class.java).apply {
-            putExtra("title", task.title)
-            putExtra("content", "Your task '${task.title}' is due soon.")
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            task.id.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        alarmManager.cancel(pendingIntent)
-
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val notificationTime = sharedPref.getInt("NOTIFICATION_TIME", 10)
-
-        val triggerAtMillis = task.dueTime - TimeUnit.MINUTES.toMillis(notificationTime.toLong())
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-    }
 }
 
