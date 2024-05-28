@@ -75,6 +75,7 @@ class TaskViewModel(
                 val isCompleted = _state.value.isCompleted
                 val category = _state.value.category
                 val attachments = _state.value.attachments
+                val id = _state.value.id
 
                 if (title.isBlank() || description.isBlank() ||
                     createTime == 0L || dueTime == 0L ||
@@ -92,6 +93,7 @@ class TaskViewModel(
                     isCompleted,
                     category,
                     attachments,
+                    id
                 )
 
                 viewModelScope.launch {
@@ -107,9 +109,11 @@ class TaskViewModel(
                         notifications = false,
                         isCompleted = false,
                         category = "",
-                        attachments = emptyList()
+                        attachments = emptyList(),
+                        id = 0
                     )
                 }
+
             }
 
             is TaskEvent.UpdateTask -> {

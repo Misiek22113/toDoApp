@@ -345,6 +345,7 @@ class MainActivity : AppCompatActivity() {
         filePaths: List<String>? = null
     ) {
         if (title.isNotBlank() && description.isNotBlank() && dueDate != 0L) {
+            val id = generateId(title, dueDate)
             viewModel.onEvent(TaskEvent.SetTitle(title))
             viewModel.onEvent(TaskEvent.SetDescription(description))
             viewModel.onEvent(TaskEvent.SetIsCompleted(isCompleted))
@@ -353,26 +354,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.onEvent(TaskEvent.SetCategory(category))
             viewModel.onEvent(TaskEvent.SetNotifications(notifications))
             viewModel.onEvent(TaskEvent.SetAttachments(filePaths ?: emptyList()))
+            viewModel.onEvent(TaskEvent.SetId(id))
             viewModel.onEvent(TaskEvent.AddTask)
-            val triggerTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)
-            taskAlarmManager.scheduleAlarm(
-                2,
-                triggerTime,
-                title,
-                description
-            )
-//            scheduleTaskNotification(
-//                Task(
-//                    title,
-//                    description,
-//                    createTime,
-//                    dueDate,
-//                    notifications,
-//                    isCompleted,
-//                    category.toString(),
-//                    filePaths!!
-//                )
-//            )
+            if (notifications) {
+                setNotification(title, description, dueDate, id)
+            }
         }
     }
 
@@ -455,7 +441,6 @@ class MainActivity : AppCompatActivity() {
         return null
     }
 
-
     private fun getFinalTime(dueDate: Long, hours: Int, minutes: Int): Long {
         val calendar = Calendar.getInstance().apply {
             timeInMillis = dueDate
@@ -463,6 +448,11 @@ class MainActivity : AppCompatActivity() {
             add(Calendar.MINUTE, minutes)
         }
         return calendar.timeInMillis
+    }
+
+    private fun setNotification(title: String, description: String, dueTime: Long, taskId: Int) {
+        val triggerTime = dueTime - TimeUnit.MINUTES.toMillis(1)
+        taskAlarmManager.scheduleAlarm(taskId, triggerTime, title, description)
     }
 
     private fun formatDate(timestamp: Long): String {
@@ -477,6 +467,14 @@ class MainActivity : AppCompatActivity() {
             CategoryType.HOME.toString() -> CategoryType.HOME
             else -> CategoryType.NONE
         }
+    }
+
+    private fun generateId(title: String, dueDate: Long): Int {
+        var id = (title.hashCode() + dueDate.hashCode()) % 1000000
+        if(id < 0) {
+            id *= -1
+        }
+        return id
     }
 
 }

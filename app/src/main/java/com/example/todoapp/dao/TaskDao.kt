@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TaskDao {
     @Upsert
-    suspend fun upsertTask(task: Task)
+    suspend fun upsertTask(task: Task): Long
     @Query("DELETE FROM task_table WHERE id = :taskId")
     suspend fun deleteTaskById(taskId: Int);
     @Query("SELECT * FROM task_table WHERE (:isCompleted IS NULL OR isCompleted = :isCompleted) AND title LIKE '%' || :query || '%' ORDER BY dueTime ASC")
@@ -24,4 +24,6 @@ interface TaskDao {
     fun searchTask(query: String): Flow<List<Task>>
     @Update
     suspend fun updateTask(task: Task)
+    @Query("SELECT id FROM task_table WHERE title = :title AND description = :description AND dueTime = :dueTime LIMIT 1")
+    suspend fun getTaskId(title: String, description: String, dueTime: Long): Int?
 }
