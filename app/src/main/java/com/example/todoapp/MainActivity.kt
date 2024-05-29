@@ -1,12 +1,14 @@
 package com.example.todoapp
 
-import com.example.todoapp.alarm.TaskAlarmReceiver
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -24,11 +26,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.todoapp.adapter.TaskAdapter
+import com.example.todoapp.alarm.TaskAlarmScheduler
 import com.example.todoapp.database.TaskDatabase
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.Task
 import com.example.todoapp.model.TaskEvent
+import com.example.todoapp.util.TaskNotificationService
 import com.example.todoapp.view.BottomSheet
 import com.example.todoapp.view.TaskViewModel
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -38,23 +42,17 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import java.util.Calendar
-import android.util.Log
-import com.example.todoapp.alarm.TaskAlarmScheduler
-import com.example.todoapp.util.TaskNotificationService
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 typealias FilePathCallback = (String) -> Unit
@@ -451,13 +449,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setNotification(title: String, description: String, dueTime: Long, taskId: Int) {
-        val difference = TimeUnit.MINUTES.toMillis(1);
-        val currentTime = System.currentTimeMillis();
-        val triggerTime = dueTime - difference - TimeUnit.HOURS.toMillis(2)
+        val triggerTime = convertToUtcZero(dueTime)
         taskAlarmManager.scheduleAlarm(taskId, triggerTime, title, description)
         Log.i(
             "Logcat",
-            "Notification set for task: $title, at time ${formatDate(dueTime)}\n dueTime: $dueTime, triggerTime: $triggerTime, difference: $difference, currentTime: $currentTime"
+            "Notification set for task: $title, at time ${formatDate(dueTime)}\n dueTime: $dueTime, triggerTime: $triggerTime"
         )
     }
 
@@ -481,6 +477,25 @@ class MainActivity : AppCompatActivity() {
             id *= -1
         }
         return id
+    }
+
+    private fun convertToUtcZero(scheduledTime: Long): Long {
+        val notificationTime = loadNotificationTime()
+        val offset = TimeUnit.MINUTES.toMillis(notificationTime.toLong())
+
+        val timeZone: TimeZone = TimeZone.getDefault()
+        val timeZoneOffset: Int = timeZone.getOffset(Calendar.getInstance().getTimeInMillis())
+
+        val result = scheduledTime - offset - timeZoneOffset
+
+        Log.i("Logcat", "Timezone offset: $timeZoneOffset, offset $offset ,result $result")
+
+        return result
+    }
+
+    private fun loadNotificationTime(): Int {
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        return sharedPref.getInt("NOTIFICATION_TIME", 0)
     }
 
 }
