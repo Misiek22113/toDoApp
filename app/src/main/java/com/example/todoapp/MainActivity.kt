@@ -451,8 +451,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setNotification(title: String, description: String, dueTime: Long, taskId: Int) {
-        val triggerTime = dueTime - TimeUnit.MINUTES.toMillis(1)
+        val difference = TimeUnit.MINUTES.toMillis(1);
+        val currentTime = System.currentTimeMillis();
+        val triggerTime = dueTime - difference - TimeUnit.HOURS.toMillis(2)
         taskAlarmManager.scheduleAlarm(taskId, triggerTime, title, description)
+        Log.i(
+            "Logcat",
+            "Notification set for task: $title, at time ${formatDate(dueTime)}\n dueTime: $dueTime, triggerTime: $triggerTime, difference: $difference, currentTime: $currentTime"
+        )
     }
 
     private fun formatDate(timestamp: Long): String {
@@ -471,7 +477,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun generateId(title: String, dueDate: Long): Int {
         var id = (title.hashCode() + dueDate.hashCode()) % 1000000
-        if(id < 0) {
+        if (id < 0) {
             id *= -1
         }
         return id

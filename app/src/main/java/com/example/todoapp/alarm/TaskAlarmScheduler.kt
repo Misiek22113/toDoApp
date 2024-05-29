@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 
 class TaskAlarmScheduler(
     private val context: Context
@@ -28,6 +29,8 @@ class TaskAlarmScheduler(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         )
+
+        Log.i("TaskAlarmScheduler", "Alarm scheduled for task $taskId at $dueTime")
     }
 
     override fun cancelAlarm(taskId: Int) {
