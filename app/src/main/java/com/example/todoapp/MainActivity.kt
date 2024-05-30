@@ -3,7 +3,6 @@ package com.example.todoapp
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -33,6 +32,7 @@ import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.Task
 import com.example.todoapp.model.TaskEvent
 import com.example.todoapp.util.TaskNotificationService
+import com.example.todoapp.util.TimeUtils
 import com.example.todoapp.view.BottomSheet
 import com.example.todoapp.view.TaskViewModel
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -52,8 +52,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.TimeUnit
 
 typealias FilePathCallback = (String) -> Unit
 
@@ -452,7 +450,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setNotification(title: String, description: String, dueTime: Long, taskId: Int) {
-        val triggerTime = convertToUtcZero(dueTime)
+        val triggerTime = TimeUtils.convertToUtcZero(dueTime, this)
         taskAlarmManager.scheduleAlarm(taskId, triggerTime, title, description)
         Log.i(
             "Logcat",
@@ -480,25 +478,6 @@ class MainActivity : AppCompatActivity() {
             id *= -1
         }
         return id
-    }
-
-    private fun convertToUtcZero(scheduledTime: Long): Long {
-        val notificationTime = loadNotificationTime()
-        val offset = TimeUnit.MINUTES.toMillis(notificationTime.toLong())
-
-        val timeZone: TimeZone = TimeZone.getDefault()
-        val timeZoneOffset: Int = timeZone.getOffset(Calendar.getInstance().getTimeInMillis())
-
-        val result = scheduledTime - offset - timeZoneOffset
-
-        Log.i("Logcat", "Timezone offset: $timeZoneOffset, offset $offset ,result $result")
-
-        return result
-    }
-
-    private fun loadNotificationTime(): Int {
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        return sharedPref.getInt("NOTIFICATION_TIME", 0)
     }
 
 }
