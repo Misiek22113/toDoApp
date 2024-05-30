@@ -317,6 +317,9 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(resources.getString(R.string.apply_changes)) { dialog, which ->
                 val title = taskTitleText.editText?.text.toString()
                 val description = taskDescriptionText.editText?.text.toString()
+                if(task.notifications && !notificationsSwitch.isChecked) {
+                    taskAlarmManager.cancelAlarm(task.id ?: 0)
+                }
                 updateTaskInDatabase(
                     task.id,
                     title,
