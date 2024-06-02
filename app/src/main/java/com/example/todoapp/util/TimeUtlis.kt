@@ -1,7 +1,10 @@
 package com.example.todoapp.util
 
 import android.content.Context
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +29,20 @@ object TimeUtils {
         val timeZoneOffset: Int = timeZone.getOffset(Calendar.getInstance().getTimeInMillis())
 
         return System.currentTimeMillis() + timeZoneOffset
+    }
+
+    fun getFinalTime(dueDate: Long, hours: Int, minutes: Int): Long {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = dueDate
+            add(Calendar.HOUR_OF_DAY, hours)
+            add(Calendar.MINUTE, minutes)
+        }
+        return calendar.timeInMillis
+    }
+
+    fun formatDate(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return sdf.format(Date(timestamp))
     }
 
     fun convertToHourMinute(dueTime: Long): Any {
