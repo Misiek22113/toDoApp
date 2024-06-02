@@ -25,31 +25,32 @@
 
         <Button
             android:id="@+id/buttonNone"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/none" />
+            app:icon="@drawable/none_icon"/>
 
         <Button
             android:id="@+id/buttonWork"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/work" />
+            app:icon="@drawable/work_icon" />
 
         <Button
             android:id="@+id/buttonSchool"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/school" />
+            app:icon="@drawable/school_icon" />
 
         <Button
             android:id="@+id/buttonHome"
-            style="?attr/materialButtonOutlinedStyle"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/home" />
+            app:icon="@drawable/home_icon" />
+
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <com.google.android.material.button.MaterialButtonToggleGroup

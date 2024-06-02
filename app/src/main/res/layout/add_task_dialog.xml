@@ -96,12 +96,26 @@
             app:endIconDrawable="@drawable/calendar"
             app:endIconMode="custom"/>
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/hourInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:endIconDrawable="@drawable/watch"
             app:endIconMode="custom"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/addFile"
@@ -120,6 +134,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/notifications" />
+
     </LinearLayout>
 
 </LinearLayout>

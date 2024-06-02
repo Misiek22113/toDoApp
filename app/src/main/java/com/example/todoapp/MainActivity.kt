@@ -387,12 +387,15 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             )
+            if(notifications) {
+                setNotification(title, description, dueDate, taskId ?: 0)
+            }
         }
     }
 
     private var callback: FilePathCallback? = null
 
-    fun pickFile(callback: FilePathCallback) {
+    private fun pickFile(callback: FilePathCallback) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"

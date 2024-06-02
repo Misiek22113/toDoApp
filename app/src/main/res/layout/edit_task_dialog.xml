@@ -106,6 +106,13 @@
             app:endIconMode="custom">
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/hourInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:endIconDrawable="@drawable/watch"
+            app:endIconMode="custom"/>
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
