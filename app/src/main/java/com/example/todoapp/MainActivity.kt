@@ -254,6 +254,7 @@ class MainActivity : AppCompatActivity() {
             dialogView.findViewById<MaterialButtonToggleGroup>(R.id.categoryToggleButton)
         val datePicker = dialogView.findViewById<TextInputLayout>(R.id.dateInputLayout)
         val notificationsSwitch = dialogView.findViewById<MaterialSwitch>(R.id.notificationsSwitch)
+        val hourPicker = dialogView.findViewById<TextInputLayout>(R.id.hourInput)
 
         createdTimeText.text = "Created at: ${formatDate(task.createTime)}"
         taskTitleText.editText?.setText(task.title)
@@ -303,6 +304,27 @@ class MainActivity : AppCompatActivity() {
             dueDate = selectedDate
         }
 
+        val picker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(12)
+                .setMinute(10)
+                .setTitleText("Select due time")
+                .build()
+
+        var dueHour = 0
+        var dueMinute = 0
+
+        picker.addOnPositiveButtonClickListener {
+            dueHour = picker.hour
+            dueMinute = picker.minute
+            Log.i("Logcat", "Due time: $dueHour:$dueMinute")
+        }
+
+        hourPicker.setOnClickListener {
+            picker.show(supportFragmentManager, "TIME_PICKER")
+        }
+
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(resources.getString(R.string.edit_task_title))
             .setNegativeButton(resources.getString(R.string.delete_task)) { dialog, which ->
@@ -322,7 +344,7 @@ class MainActivity : AppCompatActivity() {
                     task.id,
                     title,
                     description,
-                    dueDate,
+                    getFinalTime(dueDate, dueHour, dueMinute),
                     category,
                     notificationsSwitch.isChecked,
                     task.createTime,

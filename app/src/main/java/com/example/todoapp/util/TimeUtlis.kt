@@ -27,4 +27,14 @@ object TimeUtils {
 
         return System.currentTimeMillis() + timeZoneOffset
     }
+
+    fun convertToHourMinute(dueTime: Long): Any {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = dueTime
+
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        return Pair(hour, minute)
+    }
 }
