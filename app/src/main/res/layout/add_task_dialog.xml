@@ -137,13 +137,9 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/attachmentLayout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/filesRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-
-    </LinearLayout>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

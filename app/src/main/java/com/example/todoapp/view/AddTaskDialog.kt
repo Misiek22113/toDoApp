@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import androidx.fragment.app.FragmentActivity
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.adapter.FileAdapter
+import com.example.todoapp.adapter.TaskAdapter
 import com.example.todoapp.databinding.AddTaskDialogBinding
 import com.example.todoapp.model.CategoryType
 import com.example.todoapp.model.TaskEvent
@@ -22,16 +26,28 @@ class AddTaskDialog(
     private val viewModel: TaskViewModel,
     private val notificationManager: NotificationManager
     ) {
+
+    private val filePaths = mutableListOf<String>()
+
+    private val fileAdapter = FileAdapter(mutableListOf()) { file ->
+        filePaths.remove(file)
+    }
+
     @SuppressLint("InflateParams")
     fun show() {
+
         val binding = AddTaskDialogBinding.inflate(LayoutInflater.from(activity))
 
         var category: CategoryType = CategoryType.NONE
-        val filePaths = mutableListOf<String>()
+
+        binding.filesRecyclerView.adapter = fileAdapter
+        binding.filesRecyclerView.layoutManager = LinearLayoutManager(activity)
+
 
         binding.addFile.setOnClickListener {
             fileManager.pickFile { copiedFilePath ->
                 filePaths.add(copiedFilePath)
+                fileAdapter.updateFiles(filePaths)
                 Log.i("Logcat", "Copied file path: $filePaths")
             }
         }
@@ -94,6 +110,9 @@ class AddTaskDialog(
 
         val dialog = MaterialAlertDialogBuilder(activity)
             .setTitle(activity.resources.getString(R.string.add_task_dialog_title))
+            .setNeutralButton(activity.resources.getString(R.string.cancel)) { dialog, which ->
+                dialog.dismiss()
+            }
             .setPositiveButton(activity.resources.getString(R.string.accept)) { dialog, which ->
                 val title = binding.taskTitle.editText?.text.toString()
                 val description = binding.taskDescription.editText?.text.toString()
